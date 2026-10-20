@@ -1,0 +1,17 @@
+# Environments
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Application specific
+test_output.pdf
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
