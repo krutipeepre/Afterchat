@@ -1,7 +1,11 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
+
+# Import our custom models and PDF engine
+from app.models import ConversionRequest, Conversation, Message, Role
+from app.pdf.generator import generate_pdf
 
 # Initialize the application
 app = FastAPI(
@@ -12,8 +16,6 @@ app = FastAPI(
 # Resolve paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
-
-# Ensure static directory exists to prevent startup errors during development
 os.makedirs(STATIC_DIR, exist_ok=True)
 
 # ---------------------------------------------------------
@@ -26,18 +28,55 @@ async def health_check():
     return {"status": "ok", "message": "Afterchat backend is online."}
 
 @app.post("/api/convert")
-async def convert_conversation():
+async def convert_conversation(request: ConversionRequest):
     """
-    Placeholder for the main conversion logic.
-    We will update this to accept data and return a PDF once our extractors and PDF engine are built.
+    Main conversion endpoint. 
+    Accepts either a URL or raw text, extracts the data, and returns a PDF.
     """
-    return {"status": "pending", "message": "Extraction and PDF generation coming soon."}
+    if request.method == "text":
+        # 1. Handle the Text-Paste Fallback
+        if not request.data.strip():
+            raise HTTPException(status_code=400, detail="Provided text is empty.")
+            
+        # Treat the entire pasted block as a single raw import for now
+        conversation = Conversation(
+            title="Raw Text Import",
+            source="Text Fallback",
+            messages=[
+                Message(role=Role.USER, content=request.data.strip())
+            ]
+        )
+        
+    elif request.method == "url":
+        # 2. Placeholder for URL Extraction (Next Milestone)
+        # We will plug in the extractors here shortly.
+        raise HTTPException(
+            status_code=501, 
+            detail="URL extraction is not yet implemented. Please use the text fallback."
+        )
+        
+    else:
+        raise HTTPException(status_code=400, detail="Invalid method specified.")
+
+    # 3. Generate and stream the PDF
+    try:
+        pdf_buffer = generate_pdf(conversation)
+        
+        # Return the buffer as a streaming response
+        return StreamingResponse(
+            pdf_buffer, 
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": "attachment; filename=afterchat-conversation.pdf"
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate PDF: {str(e)}")
 
 # ---------------------------------------------------------
 # Frontend Routing
 # ---------------------------------------------------------
 
-# Mount the static directory so the browser can access style.css and script.js
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/")
@@ -46,4 +85,4 @@ async def serve_frontend():
     index_path = os.path.join(STATIC_DIR, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    return {"error": "Frontend not found. We need to build index.html next!"}
+    return {"error": "Frontend not found."}
