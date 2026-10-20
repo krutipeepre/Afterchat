@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>afterchat. | Privacy-First AI Conversation to PDF</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <main class="container">
+        <header>
+            <h1 class="brand">afterchat.</h1>
+        </header>
+
+        <section class="hero">
+            <h2>Your AI conversations, beautifully preserved.</h2>
+            <p class="subtitle">Turn a shared ChatGPT or Gemini conversation into a clean, downloadable PDF.</p>
+        </section>
+
+        <section class="converter-box">
+            <form id="convert-form">
+                <div class="input-group" id="url-group">
+                    <input type="url" id="chat-url" placeholder="Paste your conversation link..." autocomplete="off">
+                </div>
+
+                <div class="input-group hidden" id="text-group">
+                    <textarea id="chat-text" placeholder="Paste your raw conversation text here..." rows="8"></textarea>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" id="convert-btn">Convert to PDF</button>
+                </div>
+            </form>
+
+            <div class="status-container hidden" id="status-container">
+                <p id="status-message"></p>
+            </div>
+
+            <div class="fallback-toggle">
+                <button type="button" id="toggle-fallback-btn" class="text-btn">Link not working? Paste text instead.</button>
+            </div>
+        </section>
+
+        <footer>
+            <p class="privacy-note">No account. No clutter. Just your conversations.</p>
+            <p class="supported-note">Supports public ChatGPT and Google Gemini links.</p>
+        </footer>
+    </main>
+    <script src="/static/script.js"></script>
+</body>
+</html>
