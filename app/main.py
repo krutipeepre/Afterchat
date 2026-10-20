@@ -7,6 +7,11 @@ from fastapi.responses import FileResponse, StreamingResponse
 from app.models import ConversionRequest, Conversation, Message, Role
 from app.pdf.generator import generate_pdf
 
+# Import security utility and extractors
+from app.utils.security import is_valid_url
+from app.extractors.chatgpt import ChatGPTAdapter
+from app.extractors.gemini import GeminiAdapter
+
 # Initialize the application
 app = FastAPI(
     title="afterchat.", 
@@ -38,7 +43,6 @@ async def convert_conversation(request: ConversionRequest):
         if not request.data.strip():
             raise HTTPException(status_code=400, detail="Provided text is empty.")
             
-        # Treat the entire pasted block as a single raw import for now
         conversation = Conversation(
             title="Raw Text Import",
             source="Text Fallback",
@@ -48,13 +52,34 @@ async def convert_conversation(request: ConversionRequest):
         )
         
     elif request.method == "url":
-        # 2. Placeholder for URL Extraction (Next Milestone)
-        # We will plug in the extractors here shortly.
-        raise HTTPException(
-            status_code=501, 
-            detail="URL extraction is not yet implemented. Please use the text fallback."
-        )
+        # 2. Handle URL Extraction
+        url = request.data.strip()
         
+        # Security: Validate scheme, domain, and prevent SSRF
+        is_safe, error_message = is_valid_url(url)
+        if not is_safe:
+            raise HTTPException(status_code=400, detail=error_message)
+            
+        # Route to the appropriate adapter
+        try:
+            if "chatgpt.com" in url or "chat.openai.com" in url:
+                adapter = ChatGPTAdapter(url)
+            elif "g.co" in url or "gemini.google.com" in url:
+                adapter = GeminiAdapter(url)
+            else:
+                # This acts as a secondary safety net
+                raise HTTPException(status_code=400, detail="Domain not supported by any available extractor.")
+                
+            # Await the extraction process
+            conversation = await adapter.extract()
+            
+        except ValueError as ve:
+            # Catch HTTP/Network errors raised by BaseExtractor
+            raise HTTPException(status_code=400, detail=str(ve))
+        except Exception as e:
+            # Catch unexpected parsing failures
+            raise HTTPException(status_code=500, detail=f"An unexpected extraction error occurred: {str(e)}")
+            
     else:
         raise HTTPException(status_code=400, detail="Invalid method specified.")
 
@@ -62,7 +87,6 @@ async def convert_conversation(request: ConversionRequest):
     try:
         pdf_buffer = generate_pdf(conversation)
         
-        # Return the buffer as a streaming response
         return StreamingResponse(
             pdf_buffer, 
             media_type="application/pdf",
