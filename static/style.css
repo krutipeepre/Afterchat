@@ -1,0 +1,179 @@
+:root {
+    --bg-primary: #0D0F0E;
+    --bg-secondary: #151715;
+    --surface-elevated: #1B1E1B;
+    --text-primary: #F0F0EB;
+    --text-secondary: #A1A49E;
+    --text-muted: #70746D;
+    --border-subtle: #292C28;
+    --accent-subtle: #C4C9BF;
+    --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-stack);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+.container {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    margin-top: 4rem;
+}
+
+header .brand {
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+.hero {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.hero h2 {
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+}
+
+.hero .subtitle {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+}
+
+.converter-box {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    padding: 2rem;
+    border-radius: 4px; /* Very subtle rounding, no oversized cards */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+input[type="url"],
+textarea {
+    width: 100%;
+    background-color: var(--surface-elevated);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    padding: 1rem;
+    font-size: 1rem;
+    font-family: var(--font-stack);
+    border-radius: 2px;
+    transition: border-color 0.2s ease;
+    resize: vertical;
+}
+
+input[type="url"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--accent-subtle);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-muted);
+}
+
+button#convert-btn {
+    width: 100%;
+    background-color: var(--text-primary);
+    color: var(--bg-primary);
+    border: none;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background-color 0.2s ease;
+}
+
+button#convert-btn:hover {
+    background-color: var(--accent-subtle);
+}
+
+.status-container {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    padding-top: 0.5rem;
+}
+
+.fallback-toggle {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+button.text-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: color 0.2s ease;
+}
+
+button.text-btn:hover {
+    color: var(--text-secondary);
+}
+
+footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 2rem;
+}
+
+footer p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .container {
+        margin-top: 1rem;
+    }
+    
+    .converter-box {
+        padding: 1.5rem;
+    }
+    
+    .hero h2 {
+        font-size: 1.75rem;
+    }
+}
