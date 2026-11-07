@@ -1,5 +1,8 @@
+import os
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+
 from app.models import ConversionRequest, Conversation, Message, Role
 from app.pdf.generator import generate_pdf
 from app.utils.security import is_valid_url
@@ -10,7 +13,7 @@ app = FastAPI(title="afterchat.")
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "ok", "message": "Afterchat Vercel backend is online."}
+    return {"status": "ok", "message": "Afterchat API is online."}
 
 @app.post("/api/convert")
 async def convert_conversation(request: ConversionRequest):
@@ -50,3 +53,22 @@ async def convert_conversation(request: ConversionRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate PDF: {str(e)}")
+
+# ==========================================
+# LOCAL DEVELOPMENT FALLBACK
+# ==========================================
+# Vercel automatically serves the 'public' folder. 
+# For local testing, we tell FastAPI to serve it if VERCEL environment variable is missing.
+if not os.environ.get("VERCEL"):
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    PUBLIC_DIR = os.path.join(BASE_DIR, "public")
+    
+    # Mount public folder to /static since our HTML references /static/style.css
+    app.mount("/static", StaticFiles(directory=PUBLIC_DIR), name="static")
+    
+    @app.get("/")
+    async def serve_frontend():
+        index_path = os.path.join(PUBLIC_DIR, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        return {"error": "Frontend not found. Make sure you renamed the 'static' folder to 'public'."}
